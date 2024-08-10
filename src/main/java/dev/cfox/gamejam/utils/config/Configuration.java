@@ -1,4 +1,4 @@
-package dev.celestialfox.gamejam.utils.config;
+package dev.cfox.gamejam.utils.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,16 +21,17 @@ public class Configuration {
     }
 
     public static void createDefaultConfig() {
+        logger.info("Config file does not exist. Creating default config file...");
         try (FileOutputStream outputStream = new FileOutputStream(CONFIG_FILE)) {
             properties.setProperty("server.ip", "0.0.0.0");
             properties.setProperty("server.port", "25565");
 
             properties.store(outputStream, "Server Configuration");
             logger.info("Default config file created successfully.");
+            loadConfig();
         } catch (IOException e) {
             logger.error("Error while creating default config file: " + e.getMessage());
         }
-        loadConfig();
     }
 
     static String getServerIp() {

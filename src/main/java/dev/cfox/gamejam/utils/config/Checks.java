@@ -1,6 +1,5 @@
-package dev.cfox.gamejam.utils;
+package dev.cfox.gamejam.utils.config;
 
-import dev.cfox.gamejam.utils.config.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

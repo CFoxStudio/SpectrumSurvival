@@ -1,4 +1,4 @@
-package dev.cfox.gamejam.game;
+package dev.cfox.gamejam.game.phases;
 
 public enum Phases {
     RED,

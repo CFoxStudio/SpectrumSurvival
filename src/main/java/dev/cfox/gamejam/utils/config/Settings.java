@@ -1,4 +1,4 @@
-package dev.celestialfox.gamejam.utils.config;
+package dev.cfox.gamejam.utils.config;
 
 public class Settings {
     public static String getIP() {

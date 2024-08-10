@@ -1,0 +1,108 @@
+package dev.cfox.gamejam.game.classes;
+
+import dev.cfox.gamejam.game.managers.GameManager;
+import dev.cfox.gamejam.utils.classes.Randomized;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.GameMode;
+import net.minestom.server.entity.Player;
+import net.minestom.server.instance.Instance;
+import net.minestom.server.network.packet.server.play.TeamsPacket;
+import net.minestom.server.scoreboard.Team;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.UUID;
+
+public class GameLobby {
+    private static final Logger logger = LoggerFactory.getLogger(GameLobby.class);
+    private final ArrayList<UUID> players = new ArrayList<>();
+    Team team = MinecraftServer.getTeamManager().createTeam("team_" + getName());
+    private final ArrayList<UUID> eliminated = new ArrayList<>();
+    private final ArrayList<UUID> eliminatedThisRound = new ArrayList<>();
+
+    private Instance instance;
+    private String name = "";
+
+    public void setPlayers(ArrayList<UUID> playerList) {
+        players.addAll(playerList);
+        for (UUID uuid : players) {
+            team.addMember(MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(uuid).getUsername());
+        }
+        team.updateCollisionRule(TeamsPacket.CollisionRule.NEVER);
+    }
+
+    public void eliminate(Player player) {
+        if (!eliminated.contains(player)) {
+            eliminated.add(player.getUuid());
+            eliminatedThisRound.add(player.getUuid());
+            logger.info("Player " + player.getUsername() + " got eliminated (GameLobby: " + name + ")");
+            sendMessage(Randomized.elimination(player));
+            player.sendMessage(Component.text("You've got eliminated!", NamedTextColor.RED, TextDecoration.BOLD));
+            player.setGameMode(GameMode.SPECTATOR);
+        }
+    }
+
+    public ArrayList<UUID> getAllPlayers() {
+        return players;
+    }
+
+    public ArrayList<UUID> getPlayers() {
+        ArrayList<UUID> playersInGame = new ArrayList<>(players);
+        playersInGame.removeIf(uuid -> getEliminated().contains(uuid));
+        return playersInGame;
+    }
+
+    public ArrayList<UUID> getEliminated() {
+        return eliminated;
+    }
+
+    public ArrayList<UUID> getEliminatedThisRound() {
+        return eliminatedThisRound;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void genName() {
+        UUID uuid = UUID.randomUUID();
+        if (!GameManager.gameLobbies.containsKey(uuid.toString())) {
+            name = uuid.toString();
+        } else {
+            genName();
+        }
+    }
+
+    public void setInstance(Instance instance, Pos pos) {
+        this.instance = instance;
+        players.forEach(player -> {
+            Objects.requireNonNull(MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(player)).setInstance(instance)
+                    .thenRun(() -> Objects.requireNonNull(MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(player)).teleport(pos));
+        });
+    }
+
+    public Instance getInstance() {
+        return instance;
+    }
+
+    public void teleport(Pos pos) {
+        players.forEach(player -> {
+            Objects.requireNonNull(MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(player)).teleport(pos);
+        });
+    }
+
+    public void sendMessage(ComponentLike component) {
+        players.forEach(player -> MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(player).sendMessage(component));
+    }
+}
