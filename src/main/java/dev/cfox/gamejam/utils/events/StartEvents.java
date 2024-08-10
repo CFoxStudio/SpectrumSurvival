@@ -51,11 +51,8 @@ public class StartEvents {
             Player player = event.getPlayer();
 
             if (event.isFirstSpawn()) {
-                var mm = MiniMessage.miniMessage();
-                Component minestom = mm.deserialize("<gradient:#5e4fa2:#f79459:red>Minestom NPC</gradient>");
-
                 player.sendMessage(Component.text(
-                        "§e§lClick on §ror §e§lrun into §rthe ", NamedTextColor.GRAY).append(minestom).append(Component.text(" to §a§ljoin the queue!")));
+                        "§e§lClick on §ror §e§lrun into §rthe Minestom NPC to §a§ljoin the queue!", NamedTextColor.GRAY));
                 Misc.showTitle(player.getInstance(), Component.text("■", NamedTextColor.RED), Component.text("Red", NamedTextColor.RED));
             }
         });
