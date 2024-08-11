@@ -1,6 +1,7 @@
 package dev.cfox.gamejam.game.classes;
 
 import dev.cfox.gamejam.game.managers.GameManager;
+import dev.cfox.gamejam.utils.Misc;
 import dev.cfox.gamejam.utils.classes.Randomized;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
@@ -17,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.UUID;
 
 public class GameLobby {
@@ -33,7 +33,7 @@ public class GameLobby {
     public void setPlayers(ArrayList<UUID> playerList) {
         players.addAll(playerList);
         for (UUID uuid : players) {
-            team.addMember(MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(uuid).getUsername());
+            team.addMember(Misc.getPlayer(uuid).getUsername());
         }
         team.updateCollisionRule(TeamsPacket.CollisionRule.NEVER);
     }
@@ -86,9 +86,9 @@ public class GameLobby {
 
     public void setInstance(Instance instance, Pos pos) {
         this.instance = instance;
-        players.forEach(player -> {
-            Objects.requireNonNull(MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(player)).setInstance(instance)
-                    .thenRun(() -> Objects.requireNonNull(MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(player)).teleport(pos));
+        players.forEach(uuid -> {
+            Misc.getPlayer(uuid).setInstance(instance)
+                    .thenRun(() -> Misc.getPlayer(uuid).teleport(pos));
         });
     }
 
@@ -97,12 +97,12 @@ public class GameLobby {
     }
 
     public void teleport(Pos pos) {
-        players.forEach(player -> {
-            Objects.requireNonNull(MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(player)).teleport(pos);
+        players.forEach(uuid -> {
+            Misc.getPlayer(uuid).teleport(pos);
         });
     }
 
     public void sendMessage(ComponentLike component) {
-        players.forEach(player -> MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(player).sendMessage(component));
+        players.forEach(uuid -> Misc.getPlayer(uuid).sendMessage(component));
     }
 }

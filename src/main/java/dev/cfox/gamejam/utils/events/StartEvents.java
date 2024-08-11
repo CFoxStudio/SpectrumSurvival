@@ -52,7 +52,7 @@ public class StartEvents {
 
             if (event.isFirstSpawn()) {
                 player.sendMessage(Component.text(
-                        "§e§lClick on §ror §e§lrun into §rthe Minestom NPC to §a§ljoin the queue!", NamedTextColor.GRAY));
+                        "§eClick on §ror §erun into §rthe Minestom NPC to §ajoin the queue!", NamedTextColor.GRAY));
                 Misc.showTitle(player.getInstance(), Component.text("■", NamedTextColor.RED), Component.text("Red", NamedTextColor.RED));
             }
         });
