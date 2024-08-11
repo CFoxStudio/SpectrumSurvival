@@ -55,21 +55,19 @@ public class GameManager {
     public static void sendEndTitles(GameLobby game) {
         Instance instance = game.getInstance();
         List<String> winners = new ArrayList<>();
-        List<UUID> eliminatedThisRound = game.getEliminatedThisRound();
+        List<UUID> eliminated = game.getEliminated();
 
         for (Player player : instance.getPlayers()) {
-            if (eliminatedThisRound.contains(player.getUuid())) {
+            if (eliminated.contains(player.getUuid())) {
                 player.showTitle(Title.title(Component.text("Eliminated!", NamedTextColor.RED, TextDecoration.BOLD), Component.text("")));
             } else {
-                // Player is a winner if they were not eliminated this round
-                if (!game.getEliminated().contains(player.getUuid())) {
-                    player.showTitle(Title.title(Component.text("Qualified!", NamedTextColor.GREEN, TextDecoration.BOLD), Component.text("")));
-                    winners.add(player.getUsername());
-                }
+                // Player is a winner if they were not eliminated
+                player.showTitle(Title.title(Component.text("Qualified!", NamedTextColor.GREEN, TextDecoration.BOLD), Component.text("")));
+                winners.add(player.getUsername());
             }
         }
 
         // Announce winners
-        instance.sendMessage(Component.text("Winner(s): " + winners, NamedTextColor.YELLOW, TextDecoration.BOLD));
+        instance.sendMessage(Component.text("Winner(s): " + winners, NamedTextColor.YELLOW));
     }
 }

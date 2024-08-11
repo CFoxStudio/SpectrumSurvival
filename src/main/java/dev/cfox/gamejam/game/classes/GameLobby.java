@@ -1,10 +1,10 @@
 package dev.cfox.gamejam.game.classes;
 
 import dev.cfox.gamejam.game.managers.GameManager;
+import dev.cfox.gamejam.game.phases.Phase;
 import dev.cfox.gamejam.utils.Misc;
 import dev.cfox.gamejam.utils.classes.Randomized;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.MinecraftServer;
@@ -21,12 +21,11 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 public class GameLobby {
-    private static final Logger logger = LoggerFactory.getLogger(GameLobby.class);
+    private final Logger logger = LoggerFactory.getLogger(GameLobby.class);
     private final ArrayList<UUID> players = new ArrayList<>();
     Team team = MinecraftServer.getTeamManager().createTeam("team_" + getName());
     private final ArrayList<UUID> eliminated = new ArrayList<>();
-    private final ArrayList<UUID> eliminatedThisRound = new ArrayList<>();
-
+    private Phase phase;
     private Instance instance;
     private String name = "";
 
@@ -41,8 +40,7 @@ public class GameLobby {
     public void eliminate(Player player) {
         if (!eliminated.contains(player)) {
             eliminated.add(player.getUuid());
-            eliminatedThisRound.add(player.getUuid());
-            logger.info("Player " + player.getUsername() + " got eliminated (GameLobby: " + name + ")");
+            logger.debug("Player " + player.getUsername() + " got eliminated (GameLobby: " + name + ")");
             sendMessage(Randomized.elimination(player));
             player.sendMessage(Component.text("You've got eliminated!", NamedTextColor.RED, TextDecoration.BOLD));
             player.setGameMode(GameMode.SPECTATOR);
@@ -63,8 +61,12 @@ public class GameLobby {
         return eliminated;
     }
 
-    public ArrayList<UUID> getEliminatedThisRound() {
-        return eliminatedThisRound;
+    public void setPhase(Phase newPhase) {
+        phase = newPhase;
+    }
+
+    public Phase getPhase() {
+        return phase;
     }
 
     public void setName(String name) {
@@ -86,10 +88,8 @@ public class GameLobby {
 
     public void setInstance(Instance instance, Pos pos) {
         this.instance = instance;
-        players.forEach(uuid -> {
-            Misc.getPlayer(uuid).setInstance(instance)
-                    .thenRun(() -> Misc.getPlayer(uuid).teleport(pos));
-        });
+        players.forEach(uuid ->
+                Misc.getPlayer(uuid).setInstance(instance).thenRun(() -> Misc.getPlayer(uuid).teleport(pos)));
     }
 
     public Instance getInstance() {
@@ -97,12 +97,10 @@ public class GameLobby {
     }
 
     public void teleport(Pos pos) {
-        players.forEach(uuid -> {
-            Misc.getPlayer(uuid).teleport(pos);
-        });
+        players.forEach(uuid -> Misc.getPlayer(uuid).teleport(pos));
     }
 
-    public void sendMessage(ComponentLike component) {
+    public void sendMessage(Component component) {
         players.forEach(uuid -> Misc.getPlayer(uuid).sendMessage(component));
     }
 }
