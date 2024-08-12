@@ -7,6 +7,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.timer.Task;
 import net.minestom.server.timer.TaskSchedule;
 
@@ -17,16 +18,19 @@ import java.util.List;
 public class QueueManager {
     public static List<GameQueue> queues = new ArrayList<>();
     private static final HashMap<GameQueue, Task> countdownTasks = new HashMap<>();
+    private static int minPlayers = 6;
+    private static int maxPlayers = 10;
+    public static Instance lobbyInstance;
 
     public static void joinPlayer(Player player) {
         boolean queueFound = false;
 
         if (!queues.isEmpty()) {
             for (GameQueue queue : queues) {
-                if (queue.getPlayers().size() < 10) {
+                if (queue.getPlayers().size() < maxPlayers) {
                     queue.addPlayer(player.getUuid());
                     queueFound = true;
-                    if (queue.getPlayers().size() >= 6) {
+                    if (queue.getPlayers().size() >= minPlayers) {
                         startCountdown(queue);
                     }
                     break;
@@ -36,15 +40,18 @@ public class QueueManager {
 
         if (!queueFound) {
             createQueue(player);
-            player.sendMessage(Component.text("No queues were found! A new queue has been created just for you.", NamedTextColor.GREEN));
         }
+
+        player.sendMessage(Component.text("The queue starts the countdown from §e6 players.", NamedTextColor.GRAY));
+        player.sendMessage(Component.text("One queue can hold up to §e10 players.", NamedTextColor.GRAY));
+        player.sendMessage(Component.text("§e§lWaiting for too long? §rUse §a/queue force §rto start now.", NamedTextColor.GRAY));
     }
 
     public static void removePlayer(Player player) {
         GameQueue queue = getPlayerQueue(player);
         if (queue != null) {
             queue.removePlayer(player.getUuid());
-            if (queue.getPlayers().size() < 2) {
+            if (queue.getPlayers().size() < minPlayers) {
                 stopCountdown(queue);
             }
         }

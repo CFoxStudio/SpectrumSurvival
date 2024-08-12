@@ -2,21 +2,35 @@ package dev.cfox.gamejam.game.managers;
 
 import dev.cfox.gamejam.game.classes.GameLobby;
 import dev.cfox.gamejam.game.classes.GameQueue;
+import dev.cfox.gamejam.game.phases.PhaseLogic;
+import dev.cfox.gamejam.utils.Misc;
+import dev.cfox.gamejam.utils.events.StartEvents;
+import net.hollowcube.polar.PolarLoader;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.InstanceContainer;
+import net.minestom.server.instance.InstanceManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.*;
 
 public class GameManager {
     public static Map<String, GameLobby> gameLobbies = new HashMap<>();
+    private static final Logger logger = LoggerFactory.getLogger(GameManager.class);
 
     public static boolean isPlayerInGame(Player player) {
         for (GameLobby lobby : gameLobbies.values()) {
-            if (lobby.getAllPlayers().contains(player.getUuid())) {
+            if (lobby.getPlayers().contains(player.getUuid())) {
                 return true;
             }
         }
@@ -25,14 +39,15 @@ public class GameManager {
 
     public static void startGame(GameQueue queue) {
         queue.sendMessage(Component.text("The game is starting!", NamedTextColor.GREEN, TextDecoration.BOLD));
-//        String game = LobbyConverter.toGame(queue);
+        GameLobby game = ConversionManager.toGame(queue);
+        startGame(game);
         QueueManager.removeQueue(queue);
     }
 
     public static GameLobby getPlayerGame(Player player) {
         if (!gameLobbies.isEmpty()) {
             for (GameLobby gameLobby : gameLobbies.values()) {
-                if (gameLobby.getAllPlayers().contains(player.getUuid())) {
+                if (gameLobby.getPlayers().contains(player.getUuid())) {
                     return gameLobby;
                 }
             }
@@ -44,12 +59,21 @@ public class GameManager {
         return gameLobbies.get(lobby);
     }
 
-    public static int getPlayersInGame() {
-        int totalPlayers = 0;
-        for (GameLobby gameLobby : gameLobbies.values()) {
-            totalPlayers += gameLobby.getAllPlayers().size();
+    public static void startGame(GameLobby game) {
+        logger.debug("Creating Lobby Instance");
+        InstanceManager instanceManager = MinecraftServer.getInstanceManager();
+        InstanceContainer instanceContainer = instanceManager.createInstanceContainer();
+        try {
+            instanceContainer.setChunkLoader(new PolarLoader(Path.of("worlds/game.polar")));
+        } catch (IOException e) {
+            logger.error(e.getMessage());
         }
-        return totalPlayers;
+
+        game.setInstance(instanceContainer, new Pos(0, 66, 0));
+        for (UUID uuid : game.getPlayers()) {
+            Misc.getPlayer(uuid).setGameMode(GameMode.ADVENTURE);
+        }
+        PhaseLogic.random(game);
     }
 
     public static void sendEndTitles(GameLobby game) {

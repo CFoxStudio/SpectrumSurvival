@@ -1,5 +1,6 @@
 package dev.cfox.gamejam.utils.classes;
 
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.*;
 import net.minestom.server.entity.metadata.PlayerMeta;
 import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
@@ -21,6 +22,7 @@ public class NPC extends Entity {
     public NPC(@NotNull String username, @Nullable String skinTexture, @Nullable String skinSignature) {
         super(EntityType.PLAYER);
         this.username = username;
+        setCustomName(Component.text(username));
 
         this.skinTexture = skinTexture;
         this.skinSignature = skinSignature;

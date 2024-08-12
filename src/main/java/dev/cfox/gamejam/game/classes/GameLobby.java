@@ -1,9 +1,11 @@
 package dev.cfox.gamejam.game.classes;
 
 import dev.cfox.gamejam.game.managers.GameManager;
+import dev.cfox.gamejam.game.managers.QueueManager;
 import dev.cfox.gamejam.game.phases.Phase;
 import dev.cfox.gamejam.utils.Misc;
 import dev.cfox.gamejam.utils.classes.Randomized;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -14,6 +16,9 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.play.TeamsPacket;
 import net.minestom.server.scoreboard.Team;
+import net.minestom.server.timer.Task;
+import net.minestom.server.timer.TaskSchedule;
+import net.minestom.server.utils.NamespaceID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +31,7 @@ public class GameLobby {
     Team team = MinecraftServer.getTeamManager().createTeam("team_" + getName());
     private final ArrayList<UUID> eliminated = new ArrayList<>();
     private Phase phase;
+    private Task latestTask;
     private Instance instance;
     private String name = "";
 
@@ -43,18 +49,19 @@ public class GameLobby {
             logger.debug("Player " + player.getUsername() + " got eliminated (GameLobby: " + name + ")");
             sendMessage(Randomized.elimination(player));
             player.sendMessage(Component.text("You've got eliminated!", NamedTextColor.RED, TextDecoration.BOLD));
+            player.playSound(Sound.sound(NamespaceID.from("minecraft:entity.ender_dragon.growl"), Sound.Source.PLAYER, 0.5f, 1.0f));
+            MinecraftServer.getSchedulerManager().buildTask(() -> {
+                player.playSound(Sound.sound(NamespaceID.from("minecraft:entity.wither.spawn"), Sound.Source.PLAYER, 0.5f, 1.0f));
+            }).delay(TaskSchedule.millis(10)).schedule();
+            MinecraftServer.getSchedulerManager().buildTask(() -> {
+                player.playSound(Sound.sound(NamespaceID.from("minecraft:item.totem.use"), Sound.Source.PLAYER, 0.5f, 1.0f));
+            }).delay(TaskSchedule.millis(20)).schedule();
             player.setGameMode(GameMode.SPECTATOR);
         }
     }
 
-    public ArrayList<UUID> getAllPlayers() {
-        return players;
-    }
-
     public ArrayList<UUID> getPlayers() {
-        ArrayList<UUID> playersInGame = new ArrayList<>(players);
-        playersInGame.removeIf(uuid -> getEliminated().contains(uuid));
-        return playersInGame;
+        return players;
     }
 
     public ArrayList<UUID> getEliminated() {
@@ -64,19 +71,13 @@ public class GameLobby {
     public void setPhase(Phase newPhase) {
         phase = newPhase;
     }
-
     public Phase getPhase() {
         return phase;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getName() {
         return name;
     }
-
     public void genName() {
         UUID uuid = UUID.randomUUID();
         if (!GameManager.gameLobbies.containsKey(uuid.toString())) {
@@ -91,16 +92,21 @@ public class GameLobby {
         players.forEach(uuid ->
                 Misc.getPlayer(uuid).setInstance(instance).thenRun(() -> Misc.getPlayer(uuid).teleport(pos)));
     }
-
     public Instance getInstance() {
         return instance;
     }
-
     public void teleport(Pos pos) {
         players.forEach(uuid -> Misc.getPlayer(uuid).teleport(pos));
     }
 
     public void sendMessage(Component component) {
         players.forEach(uuid -> Misc.getPlayer(uuid).sendMessage(component));
+    }
+
+    public void setTask(Task task) {
+        latestTask = task;
+    }
+    public Task getTask() {
+        return latestTask;
     }
 }
