@@ -76,21 +76,28 @@ public class GameManager {
     }
 
     public static void sendEndTitles(GameLobby game) {
-        Instance instance = game.getInstance();
+        List<UUID> uuids = game.getPlayers();
         List<String> winners = new ArrayList<>();
         List<UUID> eliminated = game.getEliminated();
 
-        for (Player player : instance.getPlayers()) {
-            if (eliminated.contains(player.getUuid())) {
-                player.showTitle(Title.title(Component.text("You Lost.", NamedTextColor.RED, TextDecoration.BOLD), Component.text("")));
+        for (UUID uuid : uuids) {
+            if (eliminated.contains(uuid)) {
+                Misc.getPlayer(uuid).showTitle(Title.title(Component.text("You Lost.", NamedTextColor.RED, TextDecoration.BOLD), Component.text("")));
             } else {
-                // Player is a winner if they were not eliminated
-                player.showTitle(Title.title(Component.text("You Win!", NamedTextColor.GREEN, TextDecoration.BOLD), Component.text("")));
-                winners.add(player.getUsername());
+                Misc.getPlayer(uuid).showTitle(Title.title(Component.text("You Win!", NamedTextColor.GREEN, TextDecoration.BOLD), Component.text("")));
+                winners.add(Misc.getPlayer(uuid).getUsername());
             }
         }
 
         // Announce winners
-        instance.sendMessage(Component.text("Winner(s): " + winners, NamedTextColor.YELLOW));
+        game.sendMessage(Component.text("Winner(s): " + winners, NamedTextColor.YELLOW));
+    }
+
+    public static int getPlayersInGame() {
+        int totalPlayers = 0;
+        for (GameLobby gameLobby : gameLobbies.values()) {
+            totalPlayers += gameLobby.getPlayers().size();
+        }
+        return totalPlayers;
     }
 }

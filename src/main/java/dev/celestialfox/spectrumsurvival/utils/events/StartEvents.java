@@ -53,7 +53,8 @@ public class StartEvents {
 
             if (event.isFirstSpawn()) {
                 player.sendMessage(
-                        Component.text("Use §e/about game §rto read the rules.", NamedTextColor.GRAY)
+                        Component.text("Use §e/about game §rto read the rules.\n", NamedTextColor.GRAY)
+                        .append(Component.text("Use §e/credits and /about us §rto know who made the game.\n", NamedTextColor.GRAY))
                         .append(Component.text("§ePunch §rthe Minestom NPC to §ajoin the queue!", NamedTextColor.GRAY)));
             }
         });

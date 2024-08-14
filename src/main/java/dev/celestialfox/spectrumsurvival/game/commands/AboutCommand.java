@@ -27,10 +27,10 @@ public class AboutCommand extends Command {
                 } else if (arg1.equals("game")) {
                     player.sendMessage(
                             Component.text("\n§lAbout Spectrum Survival\n", NamedTextColor.DARK_AQUA)
-                                    .append(Component.text("Dive into Spectrum Survival, where each color phase brings a new challenge! Every 30 seconds, the color changes, creating a chaotic 3-minute survival test.\n\n", NamedTextColor.AQUA))
+                                    .append(Component.text("Dive into Spectrum Survival, where each color phase brings a new challenge! Every 20 seconds, the color changes, creating a chaotic 3-minute survival test.\n\n", NamedTextColor.AQUA))
                                     .append(Component.text("§lColor Phases:\n", NamedTextColor.LIGHT_PURPLE))
                                     .append(Component.text("- §lRed: §cFlames spread across the map. Avoid getting burned!\n", NamedTextColor.RED))
-                                    .append(Component.text("- §lBlue: §9Snowball fight frenzy! Knock back your foes.\n", NamedTextColor.BLUE))
+                                    .append(Component.text("- §lBlue: §9Snowball fight frenzy! Eliminate your foes.\n", NamedTextColor.BLUE))
                                     .append(Component.text("- §lGreen: §aWatch out for wither roses and zombies. Roses hurt, zombies eliminate instantly.\n", NamedTextColor.GREEN))
                                     .append(Component.text("- §lYellow: §eDodge lightning or be struck! §8§o(You can punch players into the lightning)\n", NamedTextColor.YELLOW))
                                     .append(Component.text("- §lGray: §7Darkness falls, pvp enabled. Fight to survive!\n", NamedTextColor.GRAY))

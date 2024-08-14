@@ -1,7 +1,10 @@
 package dev.celestialfox.spectrumsurvival.game.managers;
 
+import dev.celestialfox.spectrumsurvival.game.classes.GameLobby;
 import dev.celestialfox.spectrumsurvival.utils.Misc;
 import dev.celestialfox.spectrumsurvival.game.classes.GameQueue;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
@@ -89,9 +92,15 @@ public class QueueManager {
             queue.getPlayers().forEach(player -> Misc.getPlayer(player).showTitle(Title.title(
                             Component.text("Starting in " + countdown[0], NamedTextColor.GREEN),
                             Component.text("Get ready", NamedTextColor.GRAY))));
+            queue.getPlayers().forEach(player -> {
+                Misc.getPlayer(player).playSound(Sound.sound(Key.key("minecraft", "entity.experience_orb.pickup"), Sound.Source.MASTER, 1f, 1f));
+            });
 
             if (countdown[0] == 0) {
                 // Time's up, cancel the task and start the game
+                queue.getPlayers().forEach(player -> {
+                    Misc.getPlayer(player).playSound(Sound.sound(Key.key("minecraft", "entity.player.levelup"), Sound.Source.MASTER, 1f, 1f));
+                });
                 GameManager.startGame(queue);
                 countdownTasks.get(queue).cancel();
                 countdownTasks.remove(queue);
@@ -109,5 +118,22 @@ public class QueueManager {
             countdownTask.cancel();
             countdownTasks.remove(queue);
         }
+    }
+
+    public static boolean isPlayerInQueue(Player player) {
+        for (GameQueue queue : queues) {
+            if (queue.getPlayers().contains(player.getUuid())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static int getPlayersInQueue() {
+        int totalPlayers = 0;
+        for (GameQueue queue : queues) {
+            totalPlayers += queue.getPlayers().size();
+        }
+        return totalPlayers;
     }
 }

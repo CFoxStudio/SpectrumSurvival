@@ -31,6 +31,8 @@ public class GameLobby {
     private final ArrayList<UUID> eliminated = new ArrayList<>();
     private Phase phase;
     private Task latestTask;
+    private Task repeatTask;
+    private Task endTask;
     private Instance instance;
     private String name = "";
 
@@ -113,5 +115,19 @@ public class GameLobby {
     }
     public Task getTask() {
         return latestTask;
+    }
+
+    public void setRepeatTask(Task task) {
+        repeatTask = task;
+    }
+    public Task getRepeatTask() {
+        return repeatTask;
+    }
+
+    public void setEndTask(Task task) {
+        endTask = task;
+    }
+    public Task getEndTask() {
+        return endTask;
     }
 }

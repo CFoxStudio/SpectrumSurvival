@@ -8,6 +8,7 @@ import dev.celestialfox.spectrumsurvival.game.managers.QueueManager;
 import dev.celestialfox.spectrumsurvival.game.phases.Phase;
 import dev.celestialfox.spectrumsurvival.utils.Misc;
 import dev.celestialfox.spectrumsurvival.utils.classes.NPC;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
@@ -93,15 +94,6 @@ public class MiscEvents {
             }
         });
 
-        globalEventHandler.addListener(EntityDamageEvent.class, event -> {
-            Entity damaged = event.getEntity();
-            if (damaged instanceof Player player) {
-                if (player.getHealth() == 1 && GameManager.isPlayerInGame(player)) {
-                    GameManager.getPlayerGame(player).eliminate(player);
-                }
-            }
-        });
-
         globalEventHandler.addListener(PlayerDisconnectEvent.class, event -> {
             Player player = event.getPlayer();
             GameLobby playerGame = GameManager.getPlayerGame(player);
@@ -109,6 +101,9 @@ public class MiscEvents {
             if (GameManager.isPlayerInGame(player)) {
                 playerGame.getPlayers().remove(uuid);
                 playerGame.getEliminated().remove(uuid);
+            }
+            if (QueueManager.isPlayerInQueue(player)) {
+                QueueManager.getPlayerQueue(player).removePlayer(uuid);
             }
         });
 
@@ -118,7 +113,7 @@ public class MiscEvents {
 
             if (item.material() == Material.SNOWBALL) {
                 Pos playerPosition = player.getPosition().add(0, 1.5, 0);
-                Vec direction = player.getPosition().direction().normalize().mul(20);
+                Vec direction = player.getPosition().direction().normalize().mul(30);
                 SnowballProjectile snowball = new SnowballProjectile(player);
 
                 snowball.setInstance(player.getInstance(), playerPosition);
@@ -158,7 +153,20 @@ public class MiscEvents {
             // Cancel the default death message
             event.setDeathText(Component.text("You were eliminated!"));
             event.setChatMessage(null);
+            if (GameManager.isPlayerInGame(event.getPlayer())) {
+                GameManager.getPlayerGame(event.getPlayer()).eliminate(event.getPlayer());
+            }
         });
+
+        MinecraftServer.getSchedulerManager().buildTask(() -> {
+            for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+                if (GameManager.isPlayerInGame(player)
+                        && !(GameManager.getPlayerGame(player).getPhase() == Phase.GRAY)
+                        && player.getHealth() != 20) {
+                    player.setHealth(player.getHealth()+1);
+                }
+            }
+        }).repeat(TaskSchedule.seconds(2)).schedule();
     }
 
     private static void applyKnockback(Player attacker, Player target) {

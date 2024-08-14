@@ -29,8 +29,6 @@ public class QueueCommand extends Command {
                     } else {
                         player.sendMessage(Component.text("You're not in a queue!", NamedTextColor.RED));
                     }
-                } else if (arg1.equals("a")) {
-                    player.getInventory().addItemStack(ItemStack.of(Material.SNOWBALL, 16));
                 }
             }
         }), ArgumentType.String("arg1"));

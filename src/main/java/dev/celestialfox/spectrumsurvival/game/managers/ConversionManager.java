@@ -5,8 +5,11 @@ import dev.celestialfox.spectrumsurvival.game.classes.GameQueue;
 import dev.celestialfox.spectrumsurvival.utils.Misc;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
+import net.minestom.server.instance.Instance;
+import net.minestom.server.timer.TaskSchedule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,11 +26,19 @@ public class ConversionManager {
     }
 
     public static void fromGame(GameLobby game) {
-        if (!GameManager.gameLobbies.containsKey(game.getName())) {
+        Instance instance = game.getInstance();
+        String lobbyName = game.getName();
+        MinecraftServer.getSchedulerManager().buildTask(() -> {
+            logger.debug("Instance for GameLobby {} removed", lobbyName);
+            MinecraftServer.getInstanceManager().unregisterInstance(instance);
+        }).delay(TaskSchedule.seconds(5)).schedule();
+
+        if (!GameManager.gameLobbies.containsKey(lobbyName)) {
             return;
         }
 
-        logger.debug("GameLobby removed: " + game.getName());
+        GameManager.gameLobbies.remove(lobbyName);
+        logger.debug("GameLobby removed: " + lobbyName);
         game.sendMessage(Component.text("Game ended!", NamedTextColor.RED));
         game.setInstance(QueueManager.lobbyInstance, new Pos(0, 66, 0, 180, 0));
         game.getPlayers().forEach(uuid -> {
@@ -35,6 +46,5 @@ public class ConversionManager {
             Misc.getPlayer(uuid).setHealth(20);
         });
         GameManager.sendEndTitles(game);
-        GameManager.gameLobbies.remove(game.getName());
     }
 }

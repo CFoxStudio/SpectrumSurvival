@@ -1,6 +1,7 @@
 package dev.celestialfox.spectrumsurvival.game.phases;
 
 import dev.celestialfox.spectrumsurvival.game.classes.ZombieCreature;
+import dev.celestialfox.spectrumsurvival.game.managers.GameManager;
 import dev.celestialfox.spectrumsurvival.utils.Misc;
 import dev.celestialfox.spectrumsurvival.game.classes.GameLobby;
 import dev.celestialfox.spectrumsurvival.game.managers.ConversionManager;
@@ -43,18 +44,27 @@ public class PhaseLogic {
     private static final int zombiesSpawn = 5;
 
     public static void random(GameLobby game) {
-        if (repeatTask != null) {
-            repeatTask.cancel();
+        if (game.getRepeatTask() != null) {
+            game.getRepeatTask().cancel();
+        }
+        if (game.getEndTask() != null) {
+            game.getEndTask().cancel();
         }
 
         repeatTask = scheduler.buildTask(() -> {
             // Check if all players are eliminated
             if (game.getEliminated().size() == game.getPlayers().size()) {
                 ConversionManager.fromGame(game);
-                repeatTask.cancel();
-                endTask.cancel();
+                game.getRepeatTask().cancel();
+                game.getEndTask().cancel();
+                if (game.getTask() != null) {
+                    game.getTask().cancel();
+                }
             } else {
                 logger.debug("Starting random phase selection for GameLobby: {}", game.getName());
+                if (game.getTask() != null) {
+                    game.getTask().cancel();
+                }
                 try {
                     Phase[] phases = Phase.values();
                     Phase selectedPhase;
@@ -63,14 +73,10 @@ public class PhaseLogic {
                         selectedPhase = phases[randomIndex];
                     } while (
                             (selectedPhase == game.getPhase())
-                                    || ((selectedPhase == Phase.GRAY) && (game.getPlayers().size() == game.getEliminated().size()+1)));
+                                    || ((selectedPhase == Phase.GRAY || selectedPhase == Phase.BLUE) && (game.getPlayers().size() == game.getEliminated().size()+1)));
                     game.setPhase(selectedPhase);
 
                     logger.debug("Selected phase: {} for GameLobby: {}", selectedPhase.name(), game.getName());
-                    if (game.getTask() != null) {
-                        game.getTask().cancel();
-                    }
-
                     switch (selectedPhase) {
                         case RED -> red(game);
                         case BLUE -> blue(game);
@@ -88,11 +94,17 @@ public class PhaseLogic {
             try {
                 logger.debug("Ending game for GameLobby: {}", game.getName());
                 ConversionManager.fromGame(game);
-                repeatTask.cancel();
+                game.getRepeatTask().cancel();
+                if (game.getTask() != null) {
+                    game.getTask().cancel();
+                }
             } catch (Exception e) {
                 logger.error("Exception occurred during game ending: {}", e.getMessage());
             }
         }).delay(TaskSchedule.seconds(gameTime)).schedule();
+
+        game.setRepeatTask(repeatTask);
+        game.setEndTask(endTask);
     }
 
     public static void red(GameLobby game) {
@@ -135,7 +147,7 @@ public class PhaseLogic {
     }
     public static void blue(GameLobby game) {
         setupPhase(game, Phase.BLUE, "New color picked! §9BLUE",
-                "Battle it out with snowballs! Knock back and disorient your opponents.",
+                "Battle it out with snowballs! Eliminate everyone.",
                 "Blue", NamedTextColor.BLUE, 1000, Weather.CLEAR);
 
         // Logic
@@ -154,14 +166,24 @@ public class PhaseLogic {
                     if (block.compare(Block.MOSS_CARPET) || block.compare(Block.SHORT_GRASS) || block.compare(Block.TALL_GRASS)) {
                         game.getInstance().setBlock(pos, Block.AIR);
                     }
+                    if (block.compare(Block.HAY_BLOCK)) {
+                        game.getInstance().setBlock(pos, Block.DRIED_KELP_BLOCK);
+                    }
                 }
             }
         }
 
+        game.getInstance().setBlock(new Pos(5, 66, 3), Block.SNOW_BLOCK);
+        game.getInstance().setBlock(new Pos(5, 67, 3), Block.SNOW_BLOCK);
+        game.getInstance().setBlock(new Pos(5, 68, 3), Block.CARVED_PUMPKIN);
+
+        game.getInstance().setBlock(new Pos(-10, 66, -1), Block.SNOW_BLOCK);
+        game.getInstance().setBlock(new Pos(-10, 67, -1), Block.SNOW_BLOCK);
+
         // Snowball Supply
         game.getPlayers().forEach(uuid -> {
             Player player = Misc.getPlayer(uuid);
-            player.getInventory().addItemStack(ItemStack.of(Material.SNOWBALL, 64));
+            player.getInventory().addItemStack(ItemStack.of(Material.SNOWBALL, 16));
         });
 
         // Phase end
@@ -203,39 +225,36 @@ public class PhaseLogic {
                 "Yellow", NamedTextColor.YELLOW, 18000, Weather.RAIN);
 
         // Logic
-        scheduler.buildTask(() -> {
-            Task task = scheduler.buildTask(() -> {
-                List<UUID> uuids = game.getPlayers();
-                List<Player> eligiblePlayers = new ArrayList<>();
+        Task task = scheduler.buildTask(() -> {
+            List<UUID> uuids = game.getPlayers();
+            List<Player> eligiblePlayers = new ArrayList<>();
 
-                for (UUID uuid : uuids) {
-                    Player player = Misc.getPlayer(uuid);
-                    if (player.getGameMode() == GameMode.ADVENTURE && !isUnderBlock(player)) {
-                        eligiblePlayers.add(player);
-                    }
+            for (UUID uuid : uuids) {
+                Player player = Misc.getPlayer(uuid);
+                if (player.getGameMode() == GameMode.ADVENTURE && !isUnderBlock(player)) {
+                    eligiblePlayers.add(player);
                 }
+            }
 
-                if (!eligiblePlayers.isEmpty()) {
-                    Random random = new Random();
-                    Player randomPlayer = eligiblePlayers.get(random.nextInt(eligiblePlayers.size()));
-                    Entity lightning = new Entity(EntityType.LIGHTNING_BOLT);
-                    lightning.setInstance(randomPlayer.getInstance(), randomPlayer.getPosition());
-                    lightning.spawn();
-                    game.eliminate(randomPlayer);
-                } else {
-                    Random random = new Random();
-                    Player randomPlayer = Misc.getPlayer(uuids.get(random.nextInt(uuids.size())));
-                    Pos playerPos = randomPlayer.getPosition();
-                    Pos lightningPos = playerPos.add(random.nextInt(11) - 5, 0, random.nextInt(11) - 5
-                    );
+            if (!eligiblePlayers.isEmpty()) {
+                Random random = new Random();
+                Player randomPlayer = eligiblePlayers.get(random.nextInt(eligiblePlayers.size()));
+                Entity lightning = new Entity(EntityType.LIGHTNING_BOLT);
+                lightning.setInstance(randomPlayer.getInstance(), randomPlayer.getPosition());
+                lightning.spawn();
+                game.eliminate(randomPlayer);
+            } else {
+                Random random = new Random();
+                Player randomPlayer = Misc.getPlayer(uuids.get(random.nextInt(uuids.size())));
+                Pos playerPos = randomPlayer.getPosition();
+                Pos lightningPos = playerPos.add(random.nextInt(11) - 5, 0, random.nextInt(11) - 5);
 
-                    Entity lightning = new Entity(EntityType.LIGHTNING_BOLT);
-                    lightning.setInstance(randomPlayer.getInstance(), lightningPos);
-                    lightning.spawn();
-                }
-            }).repeat(Duration.ofSeconds(5)).schedule();
-            game.setTask(task);
-        }).delay(Duration.ofSeconds(5)).schedule();
+                Entity lightning = new Entity(EntityType.LIGHTNING_BOLT);
+                lightning.setInstance(randomPlayer.getInstance(), lightningPos);
+                lightning.spawn();
+            }
+        }).delay(Duration.ofSeconds(5)).repeat(Duration.ofSeconds(2)).schedule();
+        game.setTask(task);
     }
     public static void gray(GameLobby game) {
         setupPhase(game, Phase.GRAY, "New color picked! §8GRAY",
@@ -249,9 +268,6 @@ public class PhaseLogic {
                 Misc.getPlayer(uuid).addEffect(new Potion(PotionEffect.BLINDNESS, (byte) 1, phaseDuration*20));
             }
         });
-        scheduler.buildTask(() -> {
-            startHealthRegeneration(game);
-        }).delay(TaskSchedule.seconds(phaseDuration)).schedule();
     }
 
 
@@ -328,8 +344,6 @@ public class PhaseLogic {
                 }
             }
         }
-
-        startHealthRegeneration(game);
     }
 
     private static boolean isFlamableBlock(Block block) {
@@ -381,20 +395,5 @@ public class PhaseLogic {
         }
 
         game.setInstance(instanceContainer);
-    }
-
-    public static void startHealthRegeneration(GameLobby game) {
-        int regenerationInterval = 20; // in seconds
-
-        Task healthRegenTask = scheduler.buildTask(() -> {
-            for (UUID playerId : game.getPlayers()) {
-                Player player = Misc.getPlayer(playerId);
-                if (player != null && player.getGameMode() == GameMode.ADVENTURE) {
-                    player.addEffect(new Potion(PotionEffect.REGENERATION, (byte) 1, 100));
-                }
-            }
-        }).repeat(TaskSchedule.seconds(regenerationInterval)).schedule();
-
-        scheduler.buildTask(healthRegenTask::cancel).delay(TaskSchedule.seconds(phaseDuration)).schedule();
     }
 }
