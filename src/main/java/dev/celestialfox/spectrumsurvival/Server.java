@@ -13,6 +13,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.command.CommandManager;
+import net.minestom.server.extras.bungee.BungeeCordProxy;
 import net.minestom.server.timer.TaskSchedule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +47,7 @@ public class Server {
         MinecraftServer.getBlockManager().registerHandler("minecraft:spruce_wall_sign", SignHandler::new);
 
         // Server Start
+        BungeeCordProxy.enable();
         server.start(Settings.getIP(), Settings.getPort());
         logger.info("Server Started at " + Settings.getIP() + ":" + Settings.getPort() + " (MC: " + MinecraftServer.VERSION_NAME + ")");
     }
@@ -74,16 +76,22 @@ public class Server {
     public static NamedTextColor randomMadeByColor() {
         Random random = new Random();
         int num = random.nextInt(4);
-        if (num == 0) {
-            return NamedTextColor.BLUE;
-        } else if (num == 1) {
-            return NamedTextColor.GRAY;
-        } else if (num == 2) {
-            return NamedTextColor.GOLD;
-        } else if (num == 3) {
-            return NamedTextColor.GREEN;
-        } else {
-            return NamedTextColor.BLUE;
+        switch (num) {
+            case 0 -> {
+                return NamedTextColor.BLUE;
+            }
+            case 1 -> {
+                return NamedTextColor.GRAY;
+            }
+            case 2 -> {
+                return NamedTextColor.GOLD;
+            }
+            case 3 -> {
+                return NamedTextColor.GREEN;
+            }
+            default -> {
+                return NamedTextColor.RED;
+            }
         }
     }
 }

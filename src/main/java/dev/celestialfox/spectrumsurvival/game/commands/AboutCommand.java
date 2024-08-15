@@ -39,5 +39,10 @@ public class AboutCommand extends Command {
                 }
             }
         }), ArgumentType.String("arg1"));
+        addSyntax(((sender, context) -> {
+            if (sender instanceof Player player) {
+                player.sendMessage(Component.text("Use §e/about us §ror §e/about game", NamedTextColor.GRAY));
+            }
+        }));
     }
 }

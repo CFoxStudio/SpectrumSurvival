@@ -1,2 +1,2 @@
-rootProject.name = "MinestomGameJam"
+rootProject.name = "SpectrumSurvival"
 
