@@ -3,7 +3,7 @@ package dev.celestialfox.spectrumsurvival;
 import dev.celestialfox.spectrumsurvival.game.commands.*;
 import dev.celestialfox.spectrumsurvival.game.managers.GameManager;
 import dev.celestialfox.spectrumsurvival.game.managers.QueueManager;
-import dev.celestialfox.spectrumsurvival.utils.classes.SignHandler;
+import dev.celestialfox.spectrumsurvival.utils.classes.Randomized;
 import dev.celestialfox.spectrumsurvival.utils.config.Checks;
 import dev.celestialfox.spectrumsurvival.utils.config.Settings;
 import dev.celestialfox.spectrumsurvival.utils.events.MiscEvents;
@@ -44,7 +44,6 @@ public class Server {
 
         Terminal.start();
         tablist();
-        MinecraftServer.getBlockManager().registerHandler("minecraft:spruce_wall_sign", SignHandler::new);
 
         // Server Start
         BungeeCordProxy.enable();
@@ -67,31 +66,9 @@ public class Server {
                     .append(Component.text("\nᴘʟᴀʏᴇʀѕ ɪɴ-ɢᴀᴍᴇ: " + GameManager.getPlayersInGame() + "\n", NamedTextColor.BLUE)));
 
             Component footer = Component.newline()
-                    .append(Component.text("ᴍᴀᴅᴇ ʙʏ: CelestialFox Studio", randomMadeByColor()));
+                    .append(Component.text("ᴍᴀᴅᴇ ʙʏ: CelestialFox Studio", Randomized.madeByColor()));
 
             Audiences.players().sendPlayerListHeaderAndFooter(header, footer);
         }, TaskSchedule.tick(10), TaskSchedule.tick(10));
-    }
-
-    public static NamedTextColor randomMadeByColor() {
-        Random random = new Random();
-        int num = random.nextInt(4);
-        switch (num) {
-            case 0 -> {
-                return NamedTextColor.BLUE;
-            }
-            case 1 -> {
-                return NamedTextColor.GRAY;
-            }
-            case 2 -> {
-                return NamedTextColor.GOLD;
-            }
-            case 3 -> {
-                return NamedTextColor.GREEN;
-            }
-            default -> {
-                return NamedTextColor.RED;
-            }
-        }
     }
 }

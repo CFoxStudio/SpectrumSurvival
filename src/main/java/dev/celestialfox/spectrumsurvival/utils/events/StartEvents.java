@@ -5,6 +5,8 @@ import dev.celestialfox.spectrumsurvival.utils.classes.NPC;
 import net.hollowcube.polar.PolarLoader;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.title.Title;
+import net.kyori.adventure.title.TitlePart;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
@@ -14,6 +16,11 @@ import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.*;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +59,9 @@ public class StartEvents {
             Player player = event.getPlayer();
 
             if (event.isFirstSpawn()) {
+                player.showTitle(Title.title(
+                        Component.text("Welcome!", NamedTextColor.DARK_AQUA),
+                        Component.text("Use §e/about game §rto read the rules", NamedTextColor.AQUA)));
                 player.sendMessage(
                         Component.text("Use §e/about game §rto read the rules.\n", NamedTextColor.GRAY)
                         .append(Component.text("Use §e/credits and /about us §rto know who made the game.\n", NamedTextColor.GRAY))

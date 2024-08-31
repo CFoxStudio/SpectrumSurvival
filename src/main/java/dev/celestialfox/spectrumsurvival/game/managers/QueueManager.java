@@ -1,6 +1,5 @@
 package dev.celestialfox.spectrumsurvival.game.managers;
 
-import dev.celestialfox.spectrumsurvival.game.classes.GameLobby;
 import dev.celestialfox.spectrumsurvival.utils.Misc;
 import dev.celestialfox.spectrumsurvival.game.classes.GameQueue;
 import net.kyori.adventure.key.Key;
@@ -22,7 +21,7 @@ public class QueueManager {
     public static List<GameQueue> queues = new ArrayList<>();
     private static final HashMap<GameQueue, Task> countdownTasks = new HashMap<>();
     private static int minPlayers = 6;
-    private static int maxPlayers = 10;
+    private static int maxPlayers = 12;
     public static Instance lobbyInstance;
 
     public static void joinPlayer(Player player) {
@@ -46,8 +45,8 @@ public class QueueManager {
                 createQueue(player);
             }
 
-            player.sendMessage(Component.text("The queue starts the countdown from §e6 players.", NamedTextColor.GRAY));
-            player.sendMessage(Component.text("One queue can hold up to §e10 players.", NamedTextColor.GRAY));
+            player.sendMessage(Component.text("The queue starts the countdown from §e" + minPlayers + " players.", NamedTextColor.GRAY));
+            player.sendMessage(Component.text("One queue can hold up to §e" + maxPlayers + " players.", NamedTextColor.GRAY));
             player.sendMessage(Component.text("§e§lWaiting for too long? §rUse §a/queue force §rto start now.", NamedTextColor.GRAY));
         }
     }

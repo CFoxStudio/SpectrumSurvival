@@ -6,6 +6,7 @@ import dev.celestialfox.spectrumsurvival.utils.Misc;
 import dev.celestialfox.spectrumsurvival.game.classes.GameLobby;
 import dev.celestialfox.spectrumsurvival.game.managers.ConversionManager;
 import net.hollowcube.polar.PolarLoader;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -42,6 +43,7 @@ public class PhaseLogic {
     private static Task endTask;
 
     private static final int zombiesSpawn = 5;
+    private static BossBar nextPhaseBossBar;
 
     public static void random(GameLobby game) {
         if (game.getRepeatTask() != null) {
@@ -51,15 +53,26 @@ public class PhaseLogic {
             game.getEndTask().cancel();
         }
 
+        nextPhaseBossBar = BossBar.bossBar(
+                Component.text("Time until next phase", NamedTextColor.WHITE),
+                1.0f, // progress (between 0.0 and 1.0)
+                BossBar.Color.WHITE,
+                BossBar.Overlay.PROGRESS
+        );
+
+        game.getPlayers().forEach(uuid -> Misc.getPlayer(uuid).showBossBar(nextPhaseBossBar));
+
+        Task bossBarTask = scheduler.buildTask(() -> PhaseBossBar.updateBossBar(game, nextPhaseBossBar, phaseDuration))
+                .repeat(TaskSchedule.tick(1))
+                .schedule();
+
+        game.setBossBarTask(bossBarTask);
+
         repeatTask = scheduler.buildTask(() -> {
             // Check if all players are eliminated
             if (game.getEliminated().size() == game.getPlayers().size()) {
-                ConversionManager.fromGame(game);
-                game.getRepeatTask().cancel();
+                endGame(game);
                 game.getEndTask().cancel();
-                if (game.getTask() != null) {
-                    game.getTask().cancel();
-                }
             } else {
                 logger.debug("Starting random phase selection for GameLobby: {}", game.getName());
                 if (game.getTask() != null) {
@@ -68,9 +81,9 @@ public class PhaseLogic {
                 try {
                     Phase[] phases = Phase.values();
                     Phase selectedPhase;
+                    Random random = new Random(System.nanoTime());
                     do {
-                        int randomIndex = new Random().nextInt(phases.length);
-                        selectedPhase = phases[randomIndex];
+                        selectedPhase = phases[random.nextInt(phases.length)];
                     } while (
                             (selectedPhase == game.getPhase())
                                     || ((selectedPhase == Phase.GRAY || selectedPhase == Phase.BLUE) && (game.getPlayers().size() == game.getEliminated().size()+1)));
@@ -92,17 +105,13 @@ public class PhaseLogic {
 
         endTask = scheduler.buildTask(() -> {
             try {
-                logger.debug("Ending game for GameLobby: {}", game.getName());
-                ConversionManager.fromGame(game);
-                game.getRepeatTask().cancel();
-                if (game.getTask() != null) {
-                    game.getTask().cancel();
-                }
+                endGame(game);
             } catch (Exception e) {
                 logger.error("Exception occurred during game ending: {}", e.getMessage());
             }
         }).delay(TaskSchedule.seconds(gameTime)).schedule();
 
+        game.setPhaseStartTime(System.currentTimeMillis());
         game.setRepeatTask(repeatTask);
         game.setEndTask(endTask);
     }
@@ -114,16 +123,16 @@ public class PhaseLogic {
 
         // Logic
         List<Pos> positions = new ArrayList<>();
-        int minX = -10;
-        int maxX = 10;
-        int minZ = -10;
-        int maxZ = 10;
+        int minX = -20;
+        int maxX = 20;
+        int minZ = -20;
+        int maxZ = 20;
         for (int x = minX; x <= maxX; x++) {
             for (int z = minZ; z <= maxZ; z++) {
-                for (int y = 55; y < 75; y++) {
+                for (int y = 66; y < 70; y++) {
                     Pos pos = new Pos(x, y, z);
-                    if (new Random().nextInt(10) < 2) {
-                        if (isFlamableBlock(game.getInstance().getBlock(pos))) {
+                    if (new Random().nextInt(5) < 2) {
+                        if (Misc.isFlamableBlock(game.getInstance().getBlock(pos))) {
                             positions.add(pos);
                         }
                     }
@@ -138,7 +147,7 @@ public class PhaseLogic {
                 Pos pos = iterator.next();
                 game.getInstance().setBlock(pos, Block.FIRE);
             }
-        }).repeat(Duration.ofMillis(250)).schedule();
+        }).repeat(TaskSchedule.tick(1)).schedule();
 
         scheduler.buildTask(() -> {
             task.cancel();
@@ -197,7 +206,7 @@ public class PhaseLogic {
     }
     public static void green(GameLobby game) {
         setupPhase(game, Phase.GREEN, "New color picked! §aGREEN",
-                "Avoid wither roses and zombies! Wither roses deal damage, while zombies eliminate players instantly.",
+                "Wither roses harm, zombies kill instantly.",
                 "Green", NamedTextColor.GREEN, 18000, Weather.CLEAR);
 
         // Logic
@@ -253,13 +262,13 @@ public class PhaseLogic {
                 lightning.setInstance(randomPlayer.getInstance(), lightningPos);
                 lightning.spawn();
             }
-        }).delay(Duration.ofSeconds(5)).repeat(Duration.ofSeconds(2)).schedule();
+        }).delay(Duration.ofSeconds(5)).repeat(Duration.ofSeconds(3)).schedule();
         game.setTask(task);
     }
     public static void gray(GameLobby game) {
         setupPhase(game, Phase.GRAY, "New color picked! §8GRAY",
                 "Darkness everywhere, PvP active. Fight everyone to survive.",
-                "Gray", NamedTextColor.DARK_GRAY, 18000, Weather.CLEAR);
+                "Gray", NamedTextColor.GRAY, 18000, Weather.CLEAR);
 
         // Logic
         game.getPlayers().forEach(uuid -> {
@@ -273,10 +282,14 @@ public class PhaseLogic {
 
     public static void setupPhase(GameLobby game, Phase phase, String colorPicked, String desc,
                                   String colorText, NamedTextColor color, int time, Weather weather) {
+        PhaseBossBar.resetBossBarProgress(nextPhaseBossBar);
+        game.setPhaseStartTime(System.currentTimeMillis());
+        PhaseBossBar.updateBossBar(game, nextPhaseBossBar, phaseDuration);
+
         game.setPhase(phase);
-        game.sendMessage(Component.text(colorPicked, NamedTextColor.GRAY));
+        game.sendMessage(Component.text(colorPicked, NamedTextColor.WHITE));
         game.sendMessage(Component.text(desc, color));
-        Misc.showTitle(game.getInstance(), Component.text("■", color), Component.text(colorText, color));
+        Misc.showTitle(game.getInstance(), Component.text("■ " + colorText + " ■", color), Component.text(desc, color));
 
         long currentGameTime = game.getInstance().getTime();
         if (time != currentGameTime) {
@@ -284,6 +297,17 @@ public class PhaseLogic {
         }
 
         game.getInstance().setWeather(weather);
+    }
+
+    public static void endGame(GameLobby game) {
+        logger.debug("Ending game for GameLobby: {}", game.getName());
+        ConversionManager.fromGame(game);
+        game.getRepeatTask().cancel();
+        game.getBossBarTask().cancel();
+        if (game.getTask() != null) {
+            game.getTask().cancel();
+        }
+        PhaseBossBar.removeBossBar(game, nextPhaseBossBar);
     }
 
     private static boolean isUnderBlock(Player player) {
@@ -346,45 +370,6 @@ public class PhaseLogic {
         }
     }
 
-    private static boolean isFlamableBlock(Block block) {
-        return !block.compare(Block.AIR)
-                && !block.compare(Block.GRASS_BLOCK)
-                && !block.compare(Block.FARMLAND)
-                && !block.compare(Block.STONE)
-                && !block.compare(Block.ANDESITE)
-                && !block.compare(Block.ANDESITE_STAIRS)
-                && !block.compare(Block.ANDESITE_SLAB)
-                && !block.compare(Block.GRAVEL)
-                && !block.compare(Block.DIRT_PATH)
-                && !block.compare(Block.OAK_FENCE)
-                && !block.compare(Block.OAK_FENCE_GATE)
-                && !block.compare(Block.STONE_BRICKS)
-                && !block.compare(Block.MOSSY_STONE_BRICK_WALL)
-                && !block.compare(Block.MOSSY_STONE_BRICKS)
-                && !block.compare(Block.MOSSY_STONE_BRICK_STAIRS)
-                && !block.compare(Block.STONE_BRICK_STAIRS)
-                && !block.compare(Block.MOSSY_STONE_BRICK_SLAB)
-                && !block.compare(Block.STONE_BRICK_WALL)
-                && !block.compare(Block.BRICK_SLAB)
-                && !block.compare(Block.BRICK_STAIRS)
-                && !block.compare(Block.CHAIN)
-                && !block.compare(Block.WATER_CAULDRON)
-                && !block.compare(Block.OAK_TRAPDOOR)
-                && !block.compare(Block.SPRUCE_FENCE)
-                && !block.compare(Block.SPRUCE_FENCE_GATE)
-                && !block.compare(Block.SPRUCE_TRAPDOOR)
-                && !block.compare(Block.SPRUCE_WALL_SIGN)
-                && !block.compare(Block.SPRUCE_STAIRS)
-                && !block.compare(Block.BARRIER)
-                && !block.compare(Block.SAND)
-                && !block.compare(Block.MOSS_BLOCK)
-                && !block.compare(Block.WATER)
-                && !block.compare(Block.SEA_LANTERN)
-                && !block.compare(Block.RED_CARPET)
-                && !block.compare(Block.WHITE_CARPET)
-                && !block.compare(Block.TRIPWIRE);
-    }
-
     public static void resetInstance(GameLobby game) {
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
         InstanceContainer instanceContainer = instanceManager.createInstanceContainer();
@@ -396,4 +381,6 @@ public class PhaseLogic {
 
         game.setInstance(instanceContainer);
     }
+
+
 }

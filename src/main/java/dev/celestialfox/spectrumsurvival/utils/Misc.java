@@ -26,34 +26,6 @@ public class Misc {
         }
     }
 
-    public static void replaceInRegion(Instance instance, Pos start, Pos end, Block newBlockType) {
-        int startX = (int) Math.min(start.x(), end.x());
-        int startY = (int) Math.min(start.y(), end.y());
-        int startZ = (int) Math.min(start.z(), end.z());
-
-        int endX = (int) Math.max(start.x(), end.x());
-        int endY = (int) Math.max(start.y(), end.y());
-        int endZ = (int) Math.max(start.z(), end.z());
-
-        for (int x = startX; x <= endX; x++) {
-            for (int y = startY; y <= endY; y++) {
-                for (int z = startZ; z <= endZ; z++) {
-                    Pos pos = new Pos(x, y, z);
-                    if (instance.getBlock(pos).compare(Block.AIR)
-                            || instance.getBlock(pos).compare(Block.MOSS_CARPET)
-                            || instance.getBlock(pos).compare(Block.SHORT_GRASS)
-                            || instance.getBlock(pos).compare(Block.TALL_GRASS)
-                            || instance.getBlock(pos).compare(Block.WHEAT)
-                            || instance.getBlock(pos).compare(Block.CREEPER_HEAD)
-                            || instance.getBlock(pos).compare(Block.RED_CARPET)
-                            || instance.getBlock(pos).compare(Block.WHITE_CARPET)) {
-                        instance.setBlock(pos, newBlockType);
-                    }
-                }
-            }
-        }
-    }
-
     public static void transitionToTime(GameLobby game, Duration duration, long startTime, long endTime) {
         long transitionDuration = duration.toMillis();
         long startMillis = System.currentTimeMillis();
@@ -77,5 +49,46 @@ public class Misc {
         Pos playerPosition = player.getPosition();
         Instance instance = player.getInstance();
         return instance.getBlock(playerPosition);
+    }
+
+    public static boolean isFlamableBlock(Block block) {
+        return !block.compare(Block.AIR)
+                && !block.compare(Block.GRASS_BLOCK)
+                && !block.compare(Block.FARMLAND)
+                && !block.compare(Block.STONE)
+                && !block.compare(Block.ANDESITE)
+                && !block.compare(Block.ANDESITE_STAIRS)
+                && !block.compare(Block.ANDESITE_SLAB)
+                && !block.compare(Block.GRAVEL)
+                && !block.compare(Block.DIRT_PATH)
+                && !block.compare(Block.OAK_FENCE)
+                && !block.compare(Block.OAK_FENCE_GATE)
+                && !block.compare(Block.STONE_BRICKS)
+                && !block.compare(Block.MOSSY_STONE_BRICK_WALL)
+                && !block.compare(Block.MOSSY_STONE_BRICKS)
+                && !block.compare(Block.MOSSY_STONE_BRICK_STAIRS)
+                && !block.compare(Block.STONE_BRICK_STAIRS)
+                && !block.compare(Block.MOSSY_STONE_BRICK_SLAB)
+                && !block.compare(Block.STONE_BRICK_WALL)
+                && !block.compare(Block.BRICK_SLAB)
+                && !block.compare(Block.BRICK_STAIRS)
+                && !block.compare(Block.CHAIN)
+                && !block.compare(Block.WATER_CAULDRON)
+                && !block.compare(Block.OAK_TRAPDOOR)
+                && !block.compare(Block.OAK_PLANKS)
+                && !block.compare(Block.SPRUCE_FENCE)
+                && !block.compare(Block.SPRUCE_FENCE_GATE)
+                && !block.compare(Block.SPRUCE_TRAPDOOR)
+                && !block.compare(Block.SPRUCE_WALL_SIGN)
+                && !block.compare(Block.SPRUCE_STAIRS)
+                && !block.compare(Block.BARRIER)
+                && !block.compare(Block.SAND)
+                && !block.compare(Block.MOSS_BLOCK)
+                && !block.compare(Block.WATER)
+                && !block.compare(Block.LILY_PAD)
+                && !block.compare(Block.SEA_LANTERN)
+                && !block.compare(Block.RED_CARPET)
+                && !block.compare(Block.WHITE_CARPET)
+                && !block.compare(Block.TRIPWIRE);
     }
 }

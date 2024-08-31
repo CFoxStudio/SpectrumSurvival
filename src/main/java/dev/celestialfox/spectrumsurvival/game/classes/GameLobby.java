@@ -33,8 +33,10 @@ public class GameLobby {
     private Task latestTask;
     private Task repeatTask;
     private Task endTask;
+    private Task bossBarTask;
     private Instance instance;
     private String name = "";
+    private long phaseStartTime;
 
     public void setPlayers(ArrayList<UUID> playerList) {
         players.addAll(playerList);
@@ -116,18 +118,28 @@ public class GameLobby {
     public Task getTask() {
         return latestTask;
     }
-
     public void setRepeatTask(Task task) {
         repeatTask = task;
     }
     public Task getRepeatTask() {
         return repeatTask;
     }
-
     public void setEndTask(Task task) {
         endTask = task;
     }
     public Task getEndTask() {
         return endTask;
+    }
+    public void setBossBarTask(Task task) {
+        bossBarTask = task;
+    }
+    public Task getBossBarTask() {
+        return bossBarTask;
+    }
+    public long getPhaseStartTime() {
+        return phaseStartTime;
+    }
+    public void setPhaseStartTime(long phaseStartTime) {
+        this.phaseStartTime = phaseStartTime;
     }
 }

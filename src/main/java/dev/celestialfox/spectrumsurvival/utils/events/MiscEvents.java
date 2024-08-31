@@ -8,20 +8,17 @@ import dev.celestialfox.spectrumsurvival.game.managers.QueueManager;
 import dev.celestialfox.spectrumsurvival.game.phases.Phase;
 import dev.celestialfox.spectrumsurvival.utils.Misc;
 import dev.celestialfox.spectrumsurvival.utils.classes.NPC;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.entity.EntityAttackEvent;
-import net.minestom.server.event.entity.EntityDamageEvent;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithBlockEvent;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
 import net.minestom.server.event.player.PlayerDeathEvent;
@@ -35,7 +32,6 @@ import net.minestom.server.timer.TaskSchedule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.text.Position;
 import java.util.UUID;
 
 public class MiscEvents {
@@ -113,7 +109,7 @@ public class MiscEvents {
 
             if (item.material() == Material.SNOWBALL) {
                 Pos playerPosition = player.getPosition().add(0, 1.5, 0);
-                Vec direction = player.getPosition().direction().normalize().mul(30);
+                Vec direction = player.getPosition().direction().normalize().mul(25);
                 SnowballProjectile snowball = new SnowballProjectile(player);
 
                 snowball.setInstance(player.getInstance(), playerPosition);
