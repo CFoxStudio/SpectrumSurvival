@@ -9,7 +9,7 @@ import java.util.Properties;
 public class Configuration {
     private static final Logger logger = LoggerFactory.getLogger(Configuration.class);
     public static final String CONFIG_FILE = "config.properties";
-    private static Properties properties = new Properties();
+    public static Properties properties = new Properties();
 
     public static void loadConfig() {
         try (FileInputStream inputStream = new FileInputStream(CONFIG_FILE)) {
@@ -25,6 +25,9 @@ public class Configuration {
         try (FileOutputStream outputStream = new FileOutputStream(CONFIG_FILE)) {
             properties.setProperty("server.ip", "0.0.0.0");
             properties.setProperty("server.port", "25565");
+            properties.setProperty("server.mode", "online");
+            properties.setProperty("server.slots", "0");
+            properties.setProperty("server.proxysecret", "");
 
             properties.store(outputStream, "Server Configuration");
             logger.info("Default config file created successfully.");
@@ -39,5 +42,14 @@ public class Configuration {
     }
     static int getServerPort() {
         return Integer.parseInt(properties.getProperty("server.port"));
+    }
+    static String getServerMode() {
+        return properties.getProperty("server.mode");
+    }
+    static int getServerSlots() {
+        return Integer.parseInt(properties.getProperty("server.slots"));
+    }
+    static String getProxySecret() {
+        return properties.getProperty("server.proxysecret");
     }
 }

@@ -1,5 +1,8 @@
 package dev.celestialfox.spectrumsurvival.utils.config;
 
+import net.minestom.server.extras.MojangAuth;
+import net.minestom.server.extras.bungee.BungeeCordProxy;
+import net.minestom.server.extras.velocity.VelocityProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +37,37 @@ public class Checks {
             Configuration.createDefaultConfig();
         } else {
             Configuration.loadConfig();
+        }
+    }
+    public static void slots() {
+        if (Settings.getSlots() <= -1) {
+            logger.error("Server slots cannot be set to a number lower than 0");
+            System.exit(0);
+        } else if (Settings.getSlots() >= 1) {
+            logger.info("Server slots are set to: %s".formatted(Settings.getSlots()));
+        } else {
+            logger.info("Server slots are set to unlimited (theoretically).");
+        }
+    }
+
+    public static void mode() {
+        String mode = Settings.getMode();
+        if (mode.equals("online")) {
+            logger.info("Server is running in ONLINE mode. Everyone that connects needs to have a bought copy of Minecraft.");
+            MojangAuth.init();
+        } else if (mode.equals("offline")) {
+            logger.warn("Server is running in OFFLINE mode! " +
+                    "Player verification is disabled, allowing cracked/non-premium accounts to join. " +
+                    "For improved security, switch to ONLINE mode.");
+        } else if (mode.equals("velocity")) {
+            logger.info("Server is running in VELOCITY mode. Remember that you can connect to it only by using a Velocity Proxy.");
+            VelocityProxy.enable(Settings.getProxySecret());
+        } else if (mode.equals("bungeecord")) {
+            logger.info("Server is running in BUNGEECORD mode. Remember that you can connect to it only by using a Bungeecord Proxy (or it's forks).");
+            BungeeCordProxy.enable();
+        } else {
+            logger.warn("Server mode wasn't set (or was set incorrectly) in the config file! Defaulting to online mode.");
+            Configuration.properties.setProperty("server.mode", "online");
         }
     }
 }

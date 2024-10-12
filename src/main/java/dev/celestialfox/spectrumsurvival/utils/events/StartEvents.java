@@ -5,6 +5,7 @@ import dev.celestialfox.spectrumsurvival.utils.classes.NPC;
 import net.hollowcube.polar.PolarLoader;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.TitlePart;
 import net.minestom.server.MinecraftServer;
@@ -18,6 +19,7 @@ import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.*;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.network.packet.server.common.ServerLinksPacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -26,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.security.KeyStore;
 
 public class StartEvents {
     static GlobalEventHandler globalEventHandler = MinecraftServer.getGlobalEventHandler();
@@ -50,10 +53,27 @@ public class StartEvents {
         logger.debug("Registering Spawn Listener");
         InstanceContainer instanceContainer = createLobbyInstance();
         globalEventHandler.addListener(AsyncPlayerConfigurationEvent.class, event -> {
+            // Spawn player to the lobby instance
             final Player player = event.getPlayer();
             player.setGameMode(GameMode.ADVENTURE);
             event.setSpawningInstance(instanceContainer);
             player.setRespawnPoint(new Pos(0, 66, 0, 180, 0));
+
+            // Server Links
+            ServerLinksPacket.Entry cfoxLink =
+                    new ServerLinksPacket.Entry(
+                            Component.text("CelestialFox Website", NamedTextColor.LIGHT_PURPLE, TextDecoration.BOLD),
+                            "https://celestial-fox.com");
+            ServerLinksPacket.Entry docs =
+                    new ServerLinksPacket.Entry(
+                            Component.text("Spectrum Survival Documentation", NamedTextColor.BLUE),
+                            "https://docs.celestial-fox.com/shelves/spectrum-survival");
+            ServerLinksPacket.Entry github =
+                    new ServerLinksPacket.Entry(
+                            Component.text("Spectrum Survival Source Code", NamedTextColor.WHITE),
+                            "https://github.com/CFoxStudio/SpectrumSurvival");
+            ServerLinksPacket serverLinksPacket = new ServerLinksPacket(cfoxLink, docs, github);
+            player.sendPacket(serverLinksPacket);
         });
         globalEventHandler.addListener(PlayerSpawnEvent.class, event -> {
             Player player = event.getPlayer();

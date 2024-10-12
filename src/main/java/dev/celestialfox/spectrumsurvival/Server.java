@@ -6,6 +6,7 @@ import dev.celestialfox.spectrumsurvival.game.managers.QueueManager;
 import dev.celestialfox.spectrumsurvival.utils.classes.Randomized;
 import dev.celestialfox.spectrumsurvival.utils.config.Checks;
 import dev.celestialfox.spectrumsurvival.utils.config.Settings;
+import dev.celestialfox.spectrumsurvival.utils.events.ConnectionEvents;
 import dev.celestialfox.spectrumsurvival.utils.events.MiscEvents;
 import dev.celestialfox.spectrumsurvival.utils.events.StartEvents;
 import net.kyori.adventure.text.Component;
@@ -13,7 +14,11 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.command.CommandManager;
+import net.minestom.server.event.server.ServerListPingEvent;
+import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.bungee.BungeeCordProxy;
+import net.minestom.server.extras.velocity.VelocityProxy;
+import net.minestom.server.ping.ResponseData;
 import net.minestom.server.timer.TaskSchedule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,32 +31,39 @@ public class Server {
 
     public static void main(String[] args) {
         // Server
-        logger.info("Initializing Server");
+        logger.info("{ Initializing Server }");
         MinecraftServer server = MinecraftServer.init();
 
         // Files
-        logger.info("File Checks (Config, Worlds)");
+        logger.info("{ File Checks (Config, Worlds) }");
         Checks.configFile();
         Checks.worldFiles();
 
         // Events
-        logger.info("Startup Events (Chat, Spawn, etc.)");
+        logger.info("{ Startup Events (Chat, Spawn, etc.) }");
         StartEvents.registerChat();
         StartEvents.handleSpawn();
-        logger.info("Miscellaneous Events (Game Listeners, Commands, etc.)");
+        logger.info("{ Miscellaneous Events (Game Listeners, Commands, etc.) }");
         MiscEvents.register();
+        ConnectionEvents.register();
         registerCommands();
 
         Terminal.start();
         tablist();
 
+        // Config checks
+        logger.info("{ Config File Checks }");
+        Checks.slots();
+        Checks.mode();
+
         // Server Start
-        BungeeCordProxy.enable();
+        MinecraftServer.setBrandName("Spectrum Survival");
         server.start(Settings.getIP(), Settings.getPort());
-        logger.info("Server Started at " + Settings.getIP() + ":" + Settings.getPort() + " (MC: " + MinecraftServer.VERSION_NAME + ")");
+        logger.info("Server Started at %s:%s (MC: %s)".formatted(Settings.getIP(), Settings.getPort(), MinecraftServer.VERSION_NAME));
     }
 
     public static void registerCommands() {
+        logger.info("Registering Commands");
         CommandManager commandManager = MinecraftServer.getCommandManager();
         commandManager.register(new QueueCommand());
         commandManager.register(new AboutCommand());

@@ -8,4 +8,16 @@ public class Settings {
     public static int getPort() {
         return Configuration.getServerPort();
     }
+
+    public static String getMode() {
+        return Configuration.getServerMode();
+    }
+
+    public static int getSlots() {
+        return Configuration.getServerSlots();
+    }
+
+    public static String getProxySecret() {
+        return Configuration.getProxySecret();
+    }
 }
