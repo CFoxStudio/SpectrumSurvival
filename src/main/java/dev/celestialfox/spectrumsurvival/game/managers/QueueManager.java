@@ -2,6 +2,7 @@ package dev.celestialfox.spectrumsurvival.game.managers;
 
 import dev.celestialfox.spectrumsurvival.utils.Misc;
 import dev.celestialfox.spectrumsurvival.game.classes.GameQueue;
+import dev.celestialfox.spectrumsurvival.utils.config.GameSettings;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -20,8 +21,9 @@ import java.util.List;
 public class QueueManager {
     public static List<GameQueue> queues = new ArrayList<>();
     private static final HashMap<GameQueue, Task> countdownTasks = new HashMap<>();
-    private static int minPlayers = 6;
-    private static int maxPlayers = 12;
+    private static int minPlayers = GameSettings.getMinSlots();
+    private static int maxPlayers = GameSettings.getMaxSlots();
+    private static int waitTime = GameSettings.getWaitTime(); // in seconds
     public static Instance lobbyInstance;
 
     public static void joinPlayer(Player player) {
@@ -84,7 +86,7 @@ public class QueueManager {
             return;
         }
 
-        final int[] countdown = {5}; // Countdown timer in seconds
+        final int[] countdown = {waitTime}; // Countdown timer in seconds
 
         // Schedule a task to send the title every second
         Task task = MinecraftServer.getSchedulerManager().buildTask(() -> {

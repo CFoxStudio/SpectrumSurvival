@@ -28,6 +28,10 @@ public class Configuration {
             properties.setProperty("server.mode", "online");
             properties.setProperty("server.slots", "0");
             properties.setProperty("server.proxysecret", "");
+            properties.setProperty("game.minslots", "4");
+            properties.setProperty("game.maxslots", "12");
+            properties.setProperty("game.waittime", "5");
+            properties.setProperty("game.allowforce", "true");
 
             properties.store(outputStream, "Server Configuration");
             logger.info("Default config file created successfully.");
@@ -51,5 +55,17 @@ public class Configuration {
     }
     static String getProxySecret() {
         return properties.getProperty("server.proxysecret");
+    }
+    static int getGameMinSlots() {
+        return Integer.parseInt(properties.getProperty("game.minslots"));
+    }
+    static int getGameMaxSlots() {
+        return Integer.parseInt(properties.getProperty("game.maxslots"));
+    }
+    static int getQueueWaitTime() {
+        return Integer.parseInt(properties.getProperty("game.waittime"));
+    }
+    static boolean getQueueAllowForce() {
+        return Boolean.parseBoolean(properties.getProperty("game.allowforce"));
     }
 }

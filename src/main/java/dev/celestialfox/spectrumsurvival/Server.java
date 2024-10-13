@@ -14,16 +14,9 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.command.CommandManager;
-import net.minestom.server.event.server.ServerListPingEvent;
-import net.minestom.server.extras.MojangAuth;
-import net.minestom.server.extras.bungee.BungeeCordProxy;
-import net.minestom.server.extras.velocity.VelocityProxy;
-import net.minestom.server.ping.ResponseData;
 import net.minestom.server.timer.TaskSchedule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Random;
 
 public class Server {
     // Other
@@ -55,6 +48,7 @@ public class Server {
         logger.info("{ Config File Checks }");
         Checks.slots();
         Checks.mode();
+        Checks.gameSettings();
 
         // Server Start
         MinecraftServer.setBrandName("Spectrum Survival");

@@ -70,4 +70,39 @@ public class Checks {
             Configuration.properties.setProperty("server.mode", "online");
         }
     }
+
+    public static void gameSettings() {
+        logger.info("Checking game settings...");
+        int minSlots = GameSettings.getMinSlots();
+        int maxSlots = GameSettings.getMaxSlots();
+        boolean queueAllowForce = GameSettings.getAllowForce();
+        int queueWaitTime = GameSettings.getWaitTime();
+
+        if (minSlots < 2) {
+            logger.error("Minimum slots cannot be less than 2.");
+            System.exit(0);
+        } else {
+            logger.info("Minimum slots set to: " + minSlots);
+        }
+
+        if (maxSlots < minSlots) {
+            logger.error("Maximum slots cannot be less than the minimum slots.");
+            System.exit(0);
+        } else {
+            logger.info("Maximum slots set to: " + maxSlots);
+        }
+
+        if (queueAllowForce) {
+            logger.info("Queue force join is enabled.");
+        } else {
+            logger.info("Queue force join is disabled.");
+        }
+
+        if (queueWaitTime < 0) {
+            logger.error("Queue wait time cannot be negative.");
+            System.exit(0);
+        } else {
+            logger.info("Queue wait time set to: " + queueWaitTime + " seconds.");
+        }
+    }
 }
