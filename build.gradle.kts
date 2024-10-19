@@ -11,7 +11,7 @@ tasks.withType<Jar> {
 }
 
 group = "dev.celestialfox.spectrumsurvival"
-version = "1.1"
+version = "1.0.1"
 
 repositories {
     mavenCentral()
