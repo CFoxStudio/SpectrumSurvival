@@ -14,6 +14,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.command.CommandManager;
+import net.minestom.server.network.packet.client.play.ClientCommandChatPacket;
+import net.minestom.server.network.packet.client.play.ClientSignedCommandChatPacket;
 import net.minestom.server.timer.TaskSchedule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +65,11 @@ public class Server {
         commandManager.register(new AboutCommand());
         commandManager.register(new CreditsCommand());
         commandManager.register(new StopCommand());
+
+        // Fix for older Minecraft versions (when using ViaBackwards)
+        MinecraftServer.getPacketListenerManager().setPlayListener(ClientSignedCommandChatPacket.class, (packet, player) -> {
+                MinecraftServer.getPacketListenerManager().processClientPacket(new ClientCommandChatPacket(packet.message()), player.getPlayerConnection());
+        });
     }
 
     public static void tablist() {

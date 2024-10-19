@@ -6,11 +6,12 @@ plugins {
 tasks.withType<Jar> {
     manifest {
         attributes["Main-Class"] = "dev.celestialfox.spectrumsurvival.Server"
+        archiveFileName.set("SpectrumSurvival.jar")
     }
 }
 
 group = "dev.celestialfox.spectrumsurvival"
-version = "1.0"
+version = "1.1"
 
 repositories {
     mavenCentral()
