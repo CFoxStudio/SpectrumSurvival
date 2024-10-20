@@ -32,6 +32,13 @@ public class Configuration {
             properties.setProperty("game.maxslots", "12");
             properties.setProperty("game.waittime", "5");
             properties.setProperty("game.allowforce", "true");
+            properties.setProperty("stats.saving", "true");
+            properties.setProperty("stats.type", "dir");
+            properties.setProperty("stats.db", "players");
+            properties.setProperty("stats.ip", "");
+            properties.setProperty("stats.port", "");
+            properties.setProperty("stats.user", "");
+            properties.setProperty("stats.pass", "");
 
             properties.store(outputStream, "Server Configuration");
             logger.info("Default config file created successfully.");
@@ -67,5 +74,14 @@ public class Configuration {
     }
     static boolean getQueueAllowForce() {
         return Boolean.parseBoolean(properties.getProperty("game.allowforce"));
+    }
+    static boolean getStatsEnabled() {
+        return Boolean.parseBoolean(properties.getProperty("stats.saving"));
+    }
+    static String getStatsIp() {
+        return properties.getProperty("stats.ip");
+    }
+    static int getStatsPort() {
+        return Integer.parseInt(properties.getProperty("stats.port"));
     }
 }
