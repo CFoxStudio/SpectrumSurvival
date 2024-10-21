@@ -5,12 +5,21 @@ public class StatsSettings {
         return Configuration.getQueueAllowForce();
     }
     public static String getType() {
-        return Configuration.getStatsIp();
+        return Configuration.getStatsType();
     }
     public static String getIP() {
         return Configuration.getStatsIp();
     }
     public static int getPort() {
         return Configuration.getStatsPort();
+    }
+    public static String getDb() {
+        return Configuration.getStatsDb();
+    }
+    public static String getUser() {
+        return Configuration.getStatsUser();
+    }
+    public static String getPass() {
+        return Configuration.getStatsPass();
     }
 }

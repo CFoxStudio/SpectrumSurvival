@@ -78,10 +78,22 @@ public class Configuration {
     static boolean getStatsEnabled() {
         return Boolean.parseBoolean(properties.getProperty("stats.saving"));
     }
+    static String getStatsType() {
+        return properties.getProperty("stats.type");
+    }
     static String getStatsIp() {
         return properties.getProperty("stats.ip");
     }
     static int getStatsPort() {
         return Integer.parseInt(properties.getProperty("stats.port"));
+    }
+    static String getStatsDb() {
+        return properties.getProperty("stats.db");
+    }
+    static String getStatsUser() {
+        return properties.getProperty("stats.user");
+    }
+    static String getStatsPass() {
+        return properties.getProperty("stats.pass");
     }
 }

@@ -24,6 +24,8 @@ dependencies {
     implementation("org.slf4j:slf4j-api:2.0.13")
     implementation("org.jline:jline-terminal:3.26.3")
     implementation("org.jline:jline-reader:3.26.3")
+    implementation("org.xerial:sqlite-jdbc:3.46.1.3")
+    implementation("org.mariadb.jdbc:mariadb-java-client:3.4.1")
     implementation("ch.qos.logback:logback-classic:1.5.6")
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")

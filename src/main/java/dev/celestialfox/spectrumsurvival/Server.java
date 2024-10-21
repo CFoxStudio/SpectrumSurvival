@@ -6,9 +6,11 @@ import dev.celestialfox.spectrumsurvival.game.managers.QueueManager;
 import dev.celestialfox.spectrumsurvival.utils.classes.Randomized;
 import dev.celestialfox.spectrumsurvival.utils.config.Checks;
 import dev.celestialfox.spectrumsurvival.utils.config.Settings;
+import dev.celestialfox.spectrumsurvival.utils.config.StatsSettings;
 import dev.celestialfox.spectrumsurvival.utils.events.ConnectionEvents;
 import dev.celestialfox.spectrumsurvival.utils.events.MiscEvents;
 import dev.celestialfox.spectrumsurvival.utils.events.StartEvents;
+import dev.celestialfox.spectrumsurvival.utils.stats.Stats;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -23,6 +25,7 @@ import org.slf4j.LoggerFactory;
 public class Server {
     // Other
     private static final Logger logger = LoggerFactory.getLogger(Server.class);
+    public static Stats stats;
 
     public static void main(String[] args) {
         // Server
@@ -51,6 +54,12 @@ public class Server {
         Checks.slots();
         Checks.mode();
         Checks.gameSettings();
+
+        // Stats init
+        if (StatsSettings.getEnabled()) {
+            logger.info("{ Statistics Initialization }");
+            stats = Stats.initialize();
+        }
 
         // Server Start
         MinecraftServer.setBrandName("Spectrum Survival");

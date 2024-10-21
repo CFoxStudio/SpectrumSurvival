@@ -1,9 +1,11 @@
 package dev.celestialfox.spectrumsurvival.game.managers;
 
+import dev.celestialfox.spectrumsurvival.Server;
 import dev.celestialfox.spectrumsurvival.game.phases.PhaseLogic;
 import dev.celestialfox.spectrumsurvival.utils.Misc;
 import dev.celestialfox.spectrumsurvival.game.classes.GameLobby;
 import dev.celestialfox.spectrumsurvival.game.classes.GameQueue;
+import dev.celestialfox.spectrumsurvival.utils.config.StatsSettings;
 import net.hollowcube.polar.PolarLoader;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -77,20 +79,30 @@ public class GameManager {
 
     public static void sendEndTitles(GameLobby game) {
         List<UUID> uuids = game.getPlayers();
+        List<Player> playersWon = new ArrayList<>();
+        List<Player> playersLost = new ArrayList<>();
         List<String> winners = new ArrayList<>();
         List<UUID> eliminated = game.getEliminated();
 
         for (UUID uuid : uuids) {
             if (eliminated.contains(uuid)) {
                 Misc.getPlayer(uuid).showTitle(Title.title(Component.text("You Lost.", NamedTextColor.RED, TextDecoration.BOLD), Component.text("")));
+                playersLost.add(Misc.getPlayer(uuid));
             } else {
                 Misc.getPlayer(uuid).showTitle(Title.title(Component.text("You Win!", NamedTextColor.GREEN, TextDecoration.BOLD), Component.text("")));
+                playersWon.add(Misc.getPlayer(uuid));
                 winners.add(Misc.getPlayer(uuid).getUsername());
             }
         }
 
         // Announce winners
         game.sendMessage(Component.text("Winner(s): " + winners, NamedTextColor.YELLOW));
+
+        // Update Stats
+        if (StatsSettings.getEnabled()) {
+            Server.stats.won(playersWon);
+            Server.stats.lost(playersLost);
+        }
     }
 
     public static int getPlayersInGame() {

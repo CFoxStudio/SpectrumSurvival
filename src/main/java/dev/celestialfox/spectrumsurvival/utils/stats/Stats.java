@@ -3,10 +3,13 @@ package dev.celestialfox.spectrumsurvival.utils.stats;
 import dev.celestialfox.spectrumsurvival.utils.config.Settings;
 import dev.celestialfox.spectrumsurvival.utils.config.StatsSettings;
 import net.minestom.server.entity.Player;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class Stats {
+    private static final Logger logger = LoggerFactory.getLogger(Stats.class);
     private final IStatsStorage storage;
     private final boolean isOnlineMode;
 
@@ -40,32 +43,28 @@ public class Stats {
     }
 
     public static Stats initialize() {
-        if (!StatsSettings.getEnabled()) {
-            throw new IllegalStateException("Stats saving is disabled in the config.");
-        }
-
+        logger.info("Initializing Stats...");
         String dbType = StatsSettings.getType();
         String serverMode = Settings.getMode();
         IStatsStorage storage;
         boolean isOnlineMode = resolveOnlineMode(serverMode);
+        logger.info("Using database type: {}", dbType);
 
         switch (dbType.toLowerCase()) {
             case "mariadb":
                 storage = initializeMariaDB();
                 break;
-
             case "sqlite":
                 storage = initializeSQLite();
                 break;
-
             case "dir":
-                storage = new DirStats(StatsSettings.getDbName());
+                storage = new DirStats(StatsSettings.getDb());
                 break;
-
             default:
+                logger.error("Unsupported database type: {}", dbType);
                 throw new IllegalArgumentException("Unsupported database type: " + dbType);
         }
-
+        logger.info("Stats initialized successfully with {} database.", dbType);
         return new Stats(storage, isOnlineMode);
     }
 
@@ -76,28 +75,31 @@ public class Stats {
     }
 
     private static IStatsStorage initializeMariaDB() {
-        String ip = StatsSettings.getDbIp();
-        String port = StatsSettings.getDbPort();
-        String dbName = StatsSettings.getDbName();
-        String user = StatsSettings.getDbUser();
-        String pass = StatsSettings.getDbPassword();
-
+        String ip = StatsSettings.getIP();
+        int port = StatsSettings.getPort();
+        String dbName = StatsSettings.getDb();
+        String user = StatsSettings.getUser();
+        String pass = StatsSettings.getPass();
         String jdbcUrl = String.format("jdbc:mariadb://%s:%s/%s", ip, port, dbName);
 
+        logger.info("Connecting to MariaDB at {}:{}", ip, port);
         try {
             return new MariaDB(jdbcUrl, user, pass);
         } catch (Exception e) {
+            logger.error("Failed to initialize MariaDB", e);
             throw new RuntimeException("Failed to initialize MariaDB", e);
         }
     }
 
     private static IStatsStorage initializeSQLite() {
-        String dbPath = StatsSettings.getDbName();
+        String dbPath = StatsSettings.getDb();
+
+        logger.info("Initializing SQLite with database path: {}", dbPath);
         try {
             return new SQLite(dbPath);
         } catch (Exception e) {
+            logger.error("Failed to initialize SQLite", e);
             throw new RuntimeException("Failed to initialize SQLite", e);
         }
     }
 }
-
