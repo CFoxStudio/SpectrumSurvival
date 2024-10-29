@@ -25,6 +25,7 @@ dependencies {
     implementation("org.jline:jline-terminal:3.26.3")
     implementation("org.jline:jline-reader:3.26.3")
     implementation("org.xerial:sqlite-jdbc:3.46.1.3")
+    implementation("org.mongodb:mongodb-driver-sync:5.2.0")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.4.1")
     implementation("ch.qos.logback:logback-classic:1.5.6")
     testImplementation(platform("org.junit:junit-bom:5.9.1"))

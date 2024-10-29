@@ -2,6 +2,10 @@ package dev.celestialfox.spectrumsurvival.utils.stats;
 
 import dev.celestialfox.spectrumsurvival.utils.config.Settings;
 import dev.celestialfox.spectrumsurvival.utils.config.StatsSettings;
+import dev.celestialfox.spectrumsurvival.utils.stats.impl.DirStats;
+import dev.celestialfox.spectrumsurvival.utils.stats.impl.MariaDB;
+import dev.celestialfox.spectrumsurvival.utils.stats.impl.MongoDB;
+import dev.celestialfox.spectrumsurvival.utils.stats.impl.SQLite;
 import net.minestom.server.entity.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +61,9 @@ public class Stats {
             case "sqlite":
                 storage = initializeSQLite();
                 break;
+            case "mongodb":
+                storage = initializeMongoDB();
+                break;
             case "dir":
                 storage = new DirStats(StatsSettings.getDb());
                 break;
@@ -100,6 +107,19 @@ public class Stats {
         } catch (Exception e) {
             logger.error("Failed to initialize SQLite", e);
             throw new RuntimeException("Failed to initialize SQLite", e);
+        }
+    }
+
+    private static IStatsStorage initializeMongoDB() {
+        String connectionString = StatsSettings.getConnectionStr();
+        String databaseName = StatsSettings.getDb();
+
+        logger.info("Connecting to MongoDB at {}", connectionString);
+        try {
+            return new MongoDB(connectionString, databaseName);
+        } catch (Exception e) {
+            logger.error("Failed to initialize MongoDB", e);
+            throw new RuntimeException("Failed to initialize MongoDB", e);
         }
     }
 }
