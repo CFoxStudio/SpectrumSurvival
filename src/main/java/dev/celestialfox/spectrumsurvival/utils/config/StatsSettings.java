@@ -16,6 +16,9 @@ public class StatsSettings {
     public static String getDb() {
         return Configuration.getStatsDb();
     }
+    public static String getConnectionStr() {
+        return Configuration.getMongoUri();
+    }
     public static String getUser() {
         return Configuration.getStatsUser();
     }

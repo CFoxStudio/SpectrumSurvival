@@ -35,6 +35,7 @@ public class Configuration {
             properties.setProperty("stats.saving", "true");
             properties.setProperty("stats.type", "dir");
             properties.setProperty("stats.db", "players");
+            properties.setProperty("stats.mongo-uri", "mongodb://localhost:27017");
             properties.setProperty("stats.ip", "");
             properties.setProperty("stats.port", "");
             properties.setProperty("stats.user", "");
@@ -95,5 +96,8 @@ public class Configuration {
     }
     static String getStatsPass() {
         return properties.getProperty("stats.pass");
+    }
+    static String getMongoUri() {
+        return properties.getProperty("stats.mongo-uri");
     }
 }

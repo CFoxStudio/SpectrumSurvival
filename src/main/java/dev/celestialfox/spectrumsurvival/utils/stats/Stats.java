@@ -57,6 +57,9 @@ public class Stats {
             case "sqlite":
                 storage = initializeSQLite();
                 break;
+            case "mongo":
+                logger.error("MongoDB is not supported yet.");
+                throw new UnsupportedOperationException("MongoDB is not supported yet.");
             case "dir":
                 storage = new DirStats(StatsSettings.getDb());
                 break;
