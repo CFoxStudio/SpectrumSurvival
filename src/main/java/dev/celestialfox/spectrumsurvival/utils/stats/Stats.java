@@ -2,6 +2,10 @@ package dev.celestialfox.spectrumsurvival.utils.stats;
 
 import dev.celestialfox.spectrumsurvival.utils.config.Settings;
 import dev.celestialfox.spectrumsurvival.utils.config.StatsSettings;
+import dev.celestialfox.spectrumsurvival.utils.stats.impl.DirStats;
+import dev.celestialfox.spectrumsurvival.utils.stats.impl.MariaDB;
+import dev.celestialfox.spectrumsurvival.utils.stats.impl.MongoDB;
+import dev.celestialfox.spectrumsurvival.utils.stats.impl.SQLite;
 import net.minestom.server.entity.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

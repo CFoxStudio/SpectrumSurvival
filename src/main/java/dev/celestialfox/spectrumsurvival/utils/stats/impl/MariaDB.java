@@ -1,4 +1,6 @@
-package dev.celestialfox.spectrumsurvival.utils.stats;
+package dev.celestialfox.spectrumsurvival.utils.stats.impl;
+
+import dev.celestialfox.spectrumsurvival.utils.stats.IStatsStorage;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
