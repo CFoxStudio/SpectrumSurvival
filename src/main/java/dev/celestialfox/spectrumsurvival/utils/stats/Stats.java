@@ -57,9 +57,9 @@ public class Stats {
             case "sqlite":
                 storage = initializeSQLite();
                 break;
-            case "mongo":
-                logger.error("MongoDB is not supported yet.");
-                throw new UnsupportedOperationException("MongoDB is not supported yet.");
+            case "mongodb":
+                storage = initializeMongoDB();
+                break;
             case "dir":
                 storage = new DirStats(StatsSettings.getDb());
                 break;
@@ -103,6 +103,19 @@ public class Stats {
         } catch (Exception e) {
             logger.error("Failed to initialize SQLite", e);
             throw new RuntimeException("Failed to initialize SQLite", e);
+        }
+    }
+
+    private static IStatsStorage initializeMongoDB() {
+        String connectionString = StatsSettings.getConnectionStr();
+        String databaseName = StatsSettings.getDb();
+
+        logger.info("Connecting to MongoDB at {}", connectionString);
+        try {
+            return new MongoDB(connectionString, databaseName);
+        } catch (Exception e) {
+            logger.error("Failed to initialize MongoDB", e);
+            throw new RuntimeException("Failed to initialize MongoDB", e);
         }
     }
 }
