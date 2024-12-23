@@ -17,9 +17,9 @@ public class ConnectionEvents {
     public static void register() {
         globalEventHandler.addListener(AsyncPlayerPreLoginEvent.class, event -> {
             if (!(Settings.getSlots() <= 0) && MinecraftServer.getConnectionManager().getOnlinePlayerCount() == Settings.getSlots()) {
-                event.getPlayer().kick("The server is full");
+                event.getConnection().getPlayer().kick("The server is full");
                 logger.error("Player '%s' was kicked because the server is full (%s)"
-                        .formatted(event.getPlayer().getUsername(), (MinecraftServer.getConnectionManager().getOnlinePlayerCount() + "/" + Settings.getSlots())));
+                        .formatted(event.getConnection().getPlayer().getUsername(), (MinecraftServer.getConnectionManager().getOnlinePlayerCount() + "/" + Settings.getSlots())));
             }
         });
 

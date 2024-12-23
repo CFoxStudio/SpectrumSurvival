@@ -75,9 +75,13 @@ public class Server {
         commandManager.register(new CreditsCommand());
         commandManager.register(new StopCommand());
 
+        if (StatsSettings.getEnabled()) {
+            commandManager.register(new StatsCommand());
+        }
+
         // Fix for older Minecraft versions (when using ViaBackwards)
         MinecraftServer.getPacketListenerManager().setPlayListener(ClientSignedCommandChatPacket.class, (packet, player) -> {
-                MinecraftServer.getPacketListenerManager().processClientPacket(new ClientCommandChatPacket(packet.message()), player.getPlayerConnection());
+                MinecraftServer.getPacketListenerManager().processClientPacket(new ClientCommandChatPacket(packet.message()), player.getPlayerConnection(), player.getPlayerConnection().getConnectionState());
         });
     }
 

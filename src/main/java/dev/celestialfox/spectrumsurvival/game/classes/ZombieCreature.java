@@ -16,7 +16,7 @@ public class ZombieCreature extends EntityCreature {
 
     public ZombieCreature() {
         super(EntityType.ZOMBIE);
-        getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).setBaseValue(0.2);
+        getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.2);
         addAIGroup(
                 List.of(
                         new MeleeAttackGoal(this, 1.6, 20, TimeUnit.SERVER_TICK), // Attack the target

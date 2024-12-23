@@ -43,7 +43,7 @@ public class StartEvents {
             // Get everything
             String username = event.getPlayer().getUsername();
             Instance instance = event.getInstance();
-            String message = event.getMessage();
+            String message = event.getRawMessage();
 
             // Send message to player's instance
             instance.sendMessage(Component.text("§e" + username + "§7 ･ " + message));
