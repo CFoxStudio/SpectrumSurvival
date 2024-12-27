@@ -1,8 +1,8 @@
 # Spectrum Survival
 A Minecraft: Java Edition minigame made in Minestom for Minestom Gamejam 2024
 
-[Documentation](https://docs.celestial-fox.com/shelves/spectrum-survival)
-[CI Builds (CodeMC)](https://ci.codemc.io/job/CFoxStudio/job/SpectrumSurvival/)
+< [Documentation](https://docs.celestial-fox.com/shelves/spectrum-survival) |
+[CI Builds (CodeMC)](https://ci.codemc.io/job/CFoxStudio/job/SpectrumSurvival/) >
 
 ## What is this about:
 It's a short minigame created for Minestom Gamejam. 
